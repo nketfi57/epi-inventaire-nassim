@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTE EPI INVENTAIRE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e27;
+            --primary-light: #1a1f3a;
+            --accent: #ff6b00;
+            --accent-glow: rgba(255, 107, 0, 0.3);
+            --success: #00ff9f;
+            --warning: #ffd60a;
+            --danger: #ff006e;
+            --bg-gradient: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 159, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-bottom: 3rem;
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .auth-card {
+            max-width: 500px;
+            margin: 4rem auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
+            color: white;
+            box-shadow: 0 10px 30px var(--accent-glow);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-sm {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            width: auto;
+        }
+
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin: 3rem 0 2rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 600px;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .employee-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .employee-card:hover::before {
+            opacity: 1;
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        .employee-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .equipment-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .equipment-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .equipment-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent);
+        }
+
+        .equipment-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .equipment-icon {
+            font-size: 1.5rem;
+        }
+
+        .equipment-details {
+            flex: 1;
+        }
+
+        .equipment-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .equipment-expiry {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, var(--success) 0%, #00cc7f 100%);
+            color: var(--primary);
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #ffaa00 100%);
+            color: var(--primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #cc0055 100%);
+            color: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .badge-none {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+        }
+
+        .employee-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #0099ff 0%, #0066cc 100%);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 153, 255, 0.4);
+        }
+
+        .btn-delete {
+            background: rgba(255, 0, 110, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            backdrop-filter: blur(30px);
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(255, 107, 0, 0.4);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .modal-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .equipment-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .equipment-section h3 {
+            color: var(--accent);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .equipment-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-field input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--success) 0%, #00cc7f 100%);
+            color: var(--primary);
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 10px 30px rgba(0, 255, 159, 0.3);
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 255, 159, 0.5);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--success);
+            color: var(--text-primary);
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 255, 159, 0.3);
+            z-index: 3000;
+            animation: slideIn 0.4s ease-out;
+            max-width: 400px;
+        }
+
+        .notification.error {
+            border-color: var(--danger);
+            box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .notification.info {
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header h1 { font-size: 2rem; }
+            .header .subtitle { font-size: 1.125rem; }
+            .employees-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .user-bar { flex-direction: column; gap: 1rem; }
+            .btn-sm { width: 100%; }
+            .notification { left: 1rem; right: 1rem; }
+            .equipment-fields { grid-template-columns: 1fr; }
+            .modal-buttons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RTE EPI INVENTAIRE</h1>
+            <div class="subtitle">Inventaire EPI RTE par Nassim KETFI</div>
+            <p>Gestion par employé avec alertes d'expiration automatiques</p>
+        </div>
+
+        <!-- Login Page -->
+        <div id="loginPage">
+            <div class="auth-card">
+                <div class="form-group">
+                    <label for="adminPassword">🔐 Mot de passe</label>
+                    <input type="password" id="adminPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') login()">
+                </div>
+                <button class="btn btn-primary" onclick="login()">Se connecter</button>
+            </div>
+        </div>
+
+        <!-- Main Page -->
+        <div id="mainPage" class="hidden">
+            <div class="user-bar">
+                <div class="user-info">
+                    <div class="user-avatar">🔐</div>
+                    <div class="user-name">Administrateur RTE</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEmployees">0</div>
+                    <div class="stat-label">Employés</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="expiringCount">0</div>
+                    <div class="stat-label">Exp. < 30 jours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="expiredCount">0</div>
+                    <div class="stat-label">Expirés</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEquipments">0</div>
+                    <div class="stat-label">Total EPI</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="section-icon">👥</span>
+                    <span>Employés et Équipements</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="showAddModal()">
+                    ➕ Ajouter employé
+                </button>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher un employé..." oninput="filterEmployees()">
+            </div>
+
+            <div id="employeesGrid" class="employees-grid"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // ============================================
+        // IMPORTS FIREBASE
+        // ============================================
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            doc, 
+            updateDoc, 
+            deleteDoc,
+            addDoc
+        } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+
+        // ============================================
+        // CONFIGURATION FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2R-uRnIyM9ymjhOQW-mUv4_50Pqadjis",
+            authDomain: "rte-epi-inventaire.firebaseapp.com",
+            projectId: "rte-epi-inventaire",
+            storageBucket: "rte-epi-inventaire.firebasestorage.app",
+            messagingSenderId: "987844433606",
+            appId: "1:987844433606:web:0069eb1e5d4bb8480c29c7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const ADMIN_PASSWORD = 'Congobrazzaville28@';
+
+        // ============================================
+        // CONFIGURATION EMAILJS (TOUS TES IDENTIFIANTS)
+        // ============================================
+        const EMAILJS_CONFIG = {
+            serviceId: 'service_7dew8do',
+            templateId: 'template_x942n3m',
+            publicKey: '53VGIxYALR_QqLjgx'
+        };
+
+        // Initialiser EmailJS
+        (function() {
+            emailjs.init(EMAILJS_CONFIG.publicKey);
+            console.log("📧 EmailJS initialisé avec succès !");
+            console.log("   Service ID:", EMAILJS_CONFIG.serviceId);
+            console.log("   Template ID:", EMAILJS_CONFIG.templateId);
+        })();
+
+        console.log("🚀 RTE EPI INVENTAIRE - Application démarrée par Nassim KETFI");
+
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let employeesData = {};
+        let emailsSentToday = new Set();
+
+        // ============================================
+        // DONNÉES INITIALES
+        // ============================================
+        const initialEmployees = [
+            { name: "Cyrielle VALDENAIRE", casque: true, casqueExp: "2034-05-01", chaussure: true, gilet: true, pantalon: false, polo: false },
+            { name: "Delphine ROGER", casque: true, casqueExp: "2029-02-01", chaussure: true, gilet: false, pantalon: false, polo: false },
+            { name: "Céline TRESCH", casque: true, casqueExp: "2035-03-01", chaussure: true, gilet: true, pantalon: false, polo: false },
+            { name: "Dominique SOUCHE", casque: false, chaussure: false, gilet: false, pantalon: false, polo: false },
+            { name: "Stéphane BELAVAL", casque: true, casqueExp: "2031-02-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Rémi RONDOT", casque: true, casqueExp: "2033-07-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Kevin HANRIOT", casque: true, casqueExp: "2027-07-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Madison PIERRE", casque: true, casqueExp: "2030-01-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Irène GIROUX", casque: true, casqueExp: "2035-03-01", chaussure: true, gilet: true, pantalon: false, polo: false },
+            { name: "Doriane LATZER", casque: true, casqueExp: "2033-04-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Severine SCHUMANN", casque: true, casqueExp: "2031-09-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Cédric BLONDELLE", casque: false, chaussure: false, gilet: false, pantalon: false, polo: false },
+            { name: "Benjamin GOURDOUX", casque: true, casqueExp: "2030-01-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Matthieu CARLIER", casque: true, casqueExp: "2027-12-01", chaussure: true, gilet: true, pantalon: false, polo: false },
+            { name: "Alain PELTRE", casque: true, casqueExp: "2030-05-01", chaussure: true, gilet: true, pantalon: true, polo: true },
+            { name: "Sebastien DUPLAN", casque: true, casqueExp: "2031-12-01", chaussure: true, gilet: true, pantalon: true, polo: false },
+            { name: "Gregory LE-RESTE", casque: true, casqueExp: "2030-08-01", chaussure: true, gilet: true, pantalon: false, polo: false },
+            { name: "Manon DUBOIS", casque: true, casqueExp: "2031-09-01", chaussure: true, gilet: false, pantalon: false, polo: false }
+        ];
+
+        // ============================================
+        // INITIALISER LA BASE AVEC LES DONNÉES
+        // ============================================
+        async function initializeDatabase() {
+            try {
+                const snapshot = await getDocs(collection(db, "employees"));
+                
+                if (snapshot.empty) {
+                    console.log("📦 Initialisation de la base de données...");
+                    
+                    for (const employee of initialEmployees) {
+                        await addDoc(collection(db, "employees"), employee);
+                    }
+                    
+                    console.log("✅ Base de données initialisée avec", initialEmployees.length, "employés");
+                    showNotification(`✅ ${initialEmployees.length} employés initialisés`);
+                } else {
+                    console.log("✅ Base de données déjà initialisée avec", snapshot.size, "employés");
+                }
+            } catch (error) {
+                console.error("❌ Erreur initialisation:", error);
+            }
+        }
+
+        // ============================================
+        // FONCTION D'ENVOI D'EMAIL
+        // ============================================
+        async function sendExpiryEmail(employeeName, equipmentName, expiryDate, daysRemaining) {
+            const emailKey = `${employeeName}-${equipmentName}-${expiryDate}`;
+            
+            if (emailsSentToday.has(emailKey)) {
+                console.log("⏭️ Email déjà envoyé aujourd'hui pour:", emailKey);
+                return false;
+            }
+
+            try {
+                console.log("📧 Envoi email expiration...", { employeeName, equipmentName, daysRemaining });
+
+                const templateParams = {
+                    location: employeeName,
+                    item_name: equipmentName,
+                    date: new Date().toLocaleDateString('fr-FR'),
+                    time: new Date().toLocaleTimeString('fr-FR'),
+                    remaining_stock: `${daysRemaining} jours`,
+                    stock_status: daysRemaining < 0 ? '🔴 EXPIRÉ' : '⚠️ EXPIRATION PROCHE'
+                };
+
+                const response = await emailjs.send(
+                    EMAILJS_CONFIG.serviceId,
+                    EMAILJS_CONFIG.templateId,
+                    templateParams
+                );
+
+                console.log('✅ Email envoyé avec succès:', response.status);
+                emailsSentToday.add(emailKey);
+                return true;
+
+            } catch (error) {
+                console.error('❌ Erreur envoi email:', error);
+                return false;
+            }
+        }
+
+        // ============================================
+        // VÉRIFIER LES EXPIRATIONS
+        // ============================================
+        async function checkExpirations() {
+            console.log("🔍 Vérification des expirations...");
+            
+            const employees = Object.values(employeesData);
+            const equipmentTypes = [
+                { key: 'casque', name: 'Casque', expKey: 'casqueExp' },
+                { key: 'chaussure', name: 'Chaussure de sécurité', expKey: 'chaussureExp' },
+                { key: 'gilet', name: 'Gilet', expKey: 'giletExp' },
+                { key: 'pantalon', name: 'Pantalon', expKey: 'pantalonExp' },
+                { key: 'polo', name: 'Polo', expKey: 'poloExp' }
+            ];
+
+            let emailsSent = 0;
+
+            for (const employee of employees) {
+                for (const equipment of equipmentTypes) {
+                    if (employee[equipment.key] && employee[equipment.expKey]) {
+                        const daysRemaining = getDaysRemaining(employee[equipment.expKey]);
+                        
+                        if (daysRemaining <= 30) {
+                            const sent = await sendExpiryEmail(
+                                employee.name,
+                                equipment.name,
+                                employee[equipment.expKey],
+                                daysRemaining
+                            );
+                            if (sent) emailsSent++;
+                        }
+                    }
+                }
+            }
+
+            if (emailsSent > 0) {
+                console.log(`✅ ${emailsSent} email(s) d'alerte envoyé(s)`);
+                showNotification(`📧 ${emailsSent} alerte(s) email envoyée(s)`, 'info');
+            } else {
+                console.log("ℹ️ Aucune alerte à envoyer");
+            }
+        }
+
+        // ============================================
+        // CALCULER JOURS RESTANTS
+        // ============================================
+        function getDaysRemaining(expiryDate) {
+            if (!expiryDate) return 999;
+            const today = new Date();
+            const expiry = new Date(expiryDate);
+            const diffTime = expiry - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // ============================================
+        // OBTENIR STATUT EXPIRATION
+        // ============================================
+        function getExpiryStatus(expiryDate) {
+            if (!expiryDate) return { badge: 'badge-none', text: 'Non équipé', icon: '⚪' };
+            
+            const days = getDaysRemaining(expiryDate);
+            
+            if (days < 0) {
+                return { badge: 'badge-danger', text: `Expiré (${Math.abs(days)}j)`, icon: '🔴' };
+            } else if (days <= 30) {
+                return { badge: 'badge-danger', text: `${days} jours`, icon: '🔴' };
+            } else if (days <= 90) {
+                return { badge: 'badge-warning', text: `${days} jours`, icon: '🟡' };
+            } else {
+                return { badge: 'badge-success', text: `${days} jours`, icon: '🟢' };
+            }
+        }
+
+        // ============================================
+        // CONNEXION
+        // ============================================
+        window.login = async function() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === ADMIN_PASSWORD) {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainPage').classList.remove('hidden');
+                
+                await initializeDatabase();
+                await loadEmployees();
+                await checkExpirations();
+                
+                showNotification('✅ Connexion réussie');
+            } else {
+                showNotification('❌ Mot de passe incorrect', 'error');
+            }
+        };
+
+        window.logout = function() {
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('mainPage').classList.add('hidden');
+            showNotification('✅ Déconnecté');
+        };
+
+        // ============================================
+        // CHARGER LES EMPLOYÉS
+        // ============================================
+        async function loadEmployees() {
+            const grid = document.getElementById('employeesGrid');
+            grid.innerHTML = '';
+
+            try {
+                const snapshot = await getDocs(collection(db, "employees"));
+                employeesData = {};
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    employeesData[docSnap.id] = { ...data, id: docSnap.id };
+                });
+
+                displayEmployees();
+                updateStats();
+
+                console.log("✅ Employés chargés:", Object.keys(employeesData).length);
+            } catch (error) {
+                console.error("❌ Erreur chargement:", error);
+                showNotification('❌ Erreur lors du chargement', 'error');
+            }
+        }
+
+        // ============================================
+        // AFFICHER LES EMPLOYÉS
+        // ============================================
+        function displayEmployees() {
+            const grid = document.getElementById('employeesGrid');
+            grid.innerHTML = '';
+
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = Object.values(employeesData).filter(emp => 
+                emp.name.toLowerCase().includes(searchTerm)
+            );
+
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+            filtered.forEach((employee, index) => {
+                const card = createEmployeeCard(employee, index);
+                grid.appendChild(card);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Aucun employé trouvé</div>';
+            }
+        }
+
+        // ============================================
+        // CRÉER CARTE EMPLOYÉ
+        // ============================================
+        function createEmployeeCard(employee, index) {
+            const card = document.createElement('div');
+            card.className = 'employee-card';
+            card.style.animationDelay = `${index * 0.05}s`;
+
+            const equipments = [
+                { key: 'casque', icon: '🪖', name: 'Casque', expKey: 'casqueExp' },
+                { key: 'chaussure', icon: '👞', name: 'Chaussure', expKey: 'chaussureExp' },
+                { key: 'gilet', icon: '🦺', name: 'Gilet', expKey: 'giletExp' },
+                { key: 'pantalon', icon: '👖', name: 'Pantalon', expKey: 'pantalonExp' },
+                { key: 'polo', icon: '👕', name: 'Polo', expKey: 'poloExp' }
+            ];
+
+            let equipmentHTML = '';
+            equipments.forEach(eq => {
+                const status = employee[eq.key] ? getExpiryStatus(employee[eq.expKey]) : { badge: 'badge-none', text: 'Non équipé', icon: '⚪' };
+                const expiryText = employee[eq.expKey] ? formatDate(employee[eq.expKey]) : 'N/A';
+                
+                equipmentHTML += `
+                    <div class="equipment-item">
+                        <div class="equipment-info">
+                            <span class="equipment-icon">${eq.icon}</span>
+                            <div class="equipment-details">
+                                <div class="equipment-name">${eq.name}</div>
+                                <div class="equipment-expiry">${employee[eq.key] ? 'Exp: ' + expiryText : 'Non équipé'}</div>
+                            </div>
+                        </div>
+                        <div class="badge ${status.badge}">${status.icon} ${status.text}</div>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="employee-header">
+                    <div class="employee-name">
+                        👤 ${escapeHtml(employee.name)}
+                    </div>
+                </div>
+                <div class="equipment-list">
+                    ${equipmentHTML}
+                </div>
+                <div class="employee-actions">
+                    <button class="btn-edit" onclick="editEmployee('${employee.id}')">
+                        ✏️ Modifier
+                    </button>
+                    <button class="btn-delete" onclick="deleteEmployee('${employee.id}', '${escapeHtml(employee.name)}')">
+                        🗑️ Supprimer
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // ============================================
+        // METTRE À JOUR STATISTIQUES
+        // ============================================
+        function updateStats() {
+            const employees = Object.values(employeesData);
+            const total = employees.length;
+            let totalEquipments = 0;
+            let expiring = 0;
+            let expired = 0;
+
+            const equipmentKeys = [
+                { key: 'casque', expKey: 'casqueExp' },
+                { key: 'chaussure', expKey: 'chaussureExp' },
+                { key: 'gilet', expKey: 'giletExp' },
+                { key: 'pantalon', expKey: 'pantalonExp' },
+                { key: 'polo', expKey: 'poloExp' }
+            ];
+
+            employees.forEach(emp => {
+                equipmentKeys.forEach(eq => {
+                    if (emp[eq.key]) {
+                        totalEquipments++;
+                        if (emp[eq.expKey]) {
+                            const days = getDaysRemaining(emp[eq.expKey]);
+                            if (days < 0) {
+                                expired++;
+                            } else if (days <= 30) {
+                                expiring++;
+                            }
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('totalEmployees').textContent = total;
+            document.getElementById('expiringCount').textContent = expiring;
+            document.getElementById('expiredCount').textContent = expired;
+            document.getElementById('totalEquipments').textContent = totalEquipments;
+        }
+
+        // ============================================
+        // MODAL AJOUT/MODIFICATION
+        // ============================================
+        window.showAddModal = function(employeeId = null) {
+            const isEdit = employeeId !== null;
+            const employee = isEdit ? employeesData[employeeId] : {};
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'employeeModal';
+
+            modal.innerHTML = `
+                <div class="modal">
+                    <h2 class="modal-title">${isEdit ? '✏️ Modifier' : '➕ Ajouter'} un employé</h2>
+                    
+                    <div class="form-group">
+                        <label>👤 Nom de l'employé</label>
+                        <input type="text" id="empName" value="${employee.name || ''}" placeholder="Ex: Jean DUPONT">
+                    </div>
+
+                    <div class="equipment-section">
+                        <h3>🪖 Casque</h3>
+                        <div class="equipment-fields">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="hasCasque" ${employee.casque ? 'checked' : ''}>
+                                <label>Possède un casque</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Date d'expiration</label>
+                                <input type="date" id="casqueExp" value="${employee.casqueExp || ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equipment-section">
+                        <h3>👞 Chaussure de sécurité</h3>
+                        <div class="equipment-fields">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="hasChaussure" ${employee.chaussure ? 'checked' : ''}>
+                                <label>Possède des chaussures</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Date d'expiration</label>
+                                <input type="date" id="chaussureExp" value="${employee.chaussureExp || ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equipment-section">
+                        <h3>🦺 Gilet</h3>
+                        <div class="equipment-fields">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="hasGilet" ${employee.gilet ? 'checked' : ''}>
+                                <label>Possède un gilet</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Date d'expiration</label>
+                                <input type="date" id="giletExp" value="${employee.giletExp || ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equipment-section">
+                        <h3>👖 Pantalon</h3>
+                        <div class="equipment-fields">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="hasPantalon" ${employee.pantalon ? 'checked' : ''}>
+                                <label>Possède un pantalon</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Date d'expiration</label>
+                                <input type="date" id="pantalonExp" value="${employee.pantalonExp || ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equipment-section">
+                        <h3>👕 Polo</h3>
+                        <div class="equipment-fields">
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="hasPolo" ${employee.polo ? 'checked' : ''}>
+                                <label>Possède un polo</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Date d'expiration</label>
+                                <input type="date" id="poloExp" value="${employee.poloExp || ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+                        <button class="btn-confirm" onclick="saveEmployee('${employeeId || ''}')">
+                            ${isEdit ? 'Modifier' : 'Ajouter'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        };
+
+        window.editEmployee = function(id) {
+            showAddModal(id);
+        };
+
+        window.closeModal = function() {
+            const modal = document.getElementById('employeeModal');
+            if (modal) modal.remove();
+        };
+
+        // ============================================
+        // SAUVEGARDER EMPLOYÉ
+        // ============================================
+        window.saveEmployee = async function(employeeId) {
+            const name = document.getElementById('empName').value.trim();
+            
+            if (!name) {
+                showNotification('⚠️ Veuillez entrer un nom', 'error');
+                return;
+            }
+
+            const employeeData = {
+                name: name,
+                casque: document.getElementById('hasCasque').checked,
+                casqueExp: document.getElementById('casqueExp').value || null,
+                chaussure: document.getElementById('hasChaussure').checked,
+                chaussureExp: document.getElementById('chaussureExp').value || null,
+                gilet: document.getElementById('hasGilet').checked,
+                giletExp: document.getElementById('giletExp').value || null,
+                pantalon: document.getElementById('hasPantalon').checked,
+                pantalonExp: document.getElementById('pantalonExp').value || null,
+                polo: document.getElementById('hasPolo').checked,
+                poloExp: document.getElementById('poloExp').value || null
+            };
+
+            try {
+                if (employeeId) {
+                    await updateDoc(doc(db, "employees", employeeId), employeeData);
+                    showNotification('✅ Employé modifié !');
+                } else {
+                    await addDoc(collection(db, "employees"), employeeData);
+                    showNotification('✅ Employé ajouté !');
+                }
+
+                closeModal();
+                await loadEmployees();
+                await checkExpirations();
+
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showNotification('❌ Erreur lors de la sauvegarde', 'error');
+            }
+        };
+
+        // ============================================
+        // SUPPRIMER EMPLOYÉ
+        // ============================================
+        window.deleteEmployee = async function(id, name) {
+            if (!confirm(`⚠️ Supprimer ${name} ?\n\nCette action est irréversible.`)) {
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, "employees", id));
+                showNotification(`✅ ${name} supprimé`);
+                await loadEmployees();
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showNotification('❌ Erreur lors de la suppression', 'error');
+            }
+        };
+
+        // ============================================
+        // RECHERCHE
+        // ============================================
+        window.filterEmployees = function() {
+            displayEmployees();
+        };
+
+        // ============================================
+        // UTILITAIRES
+        // ============================================
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 4000);
+        }
+
+        // ============================================
+        // VÉRIFICATION QUOTIDIENNE AUTOMATIQUE
+        // ============================================
+        setInterval(async () => {
+            console.log("🔄 Vérification automatique des expirations (24h)...");
+            await loadEmployees();
+            await checkExpirations();
+        }, 24 * 60 * 60 * 1000);
+
+        console.log("✅ RTE EPI INVENTAIRE - Prêt à l'emploi !");
+    </script>
+</body>
+</html>
