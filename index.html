@@ -1,1354 +1,1169 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTE EPI INVENTAIRE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- EmailJS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #0a0e27;
-            --primary-light: #1a1f3a;
-            --accent: #ff6b00;
-            --accent-glow: rgba(255, 107, 0, 0.3);
-            --success: #00ff9f;
-            --warning: #ffd60a;
-            --danger: #ff006e;
-            --bg-gradient: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.5);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        body {
-            font-family: 'Space Grotesk', -apple-system, sans-serif;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: var(--text-primary);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 107, 0, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 255, 159, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            text-align: center;
-            padding: 4rem 2rem;
-            margin-bottom: 3rem;
-            position: relative;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        .header h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-        }
-
-        .header .subtitle {
-            font-size: 1.5rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            font-size: 1rem;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .auth-card {
-            max-width: 500px;
-            margin: 4rem auto;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .form-group {
-            margin-bottom: 2rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 0.75rem;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--card-border);
-            border-radius: 12px;
-            font-size: 1rem;
-            color: var(--text-primary);
-            font-family: 'Space Grotesk', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        input:hover, select:hover, textarea:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-glow);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Space Grotesk', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
-            color: white;
-            box-shadow: 0 10px 30px var(--accent-glow);
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px var(--accent-glow);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            border: 1px solid var(--card-border);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-sm {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.875rem;
-            width: auto;
-        }
-
-        .user-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .user-name {
-            font-weight: 600;
-            font-size: 1.125rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin: 3rem 0 2rem 0;
-            font-size: 2rem;
-            font-weight: 700;
-            flex-wrap: wrap;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .section-icon {
-            font-size: 2.5rem;
-            filter: drop-shadow(0 0 10px var(--accent-glow));
-        }
-
-        .search-bar {
-            margin-bottom: 2rem;
-        }
-
-        .search-input {
-            width: 100%;
-            max-width: 600px;
-            padding: 1rem 1.5rem;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            font-size: 1rem;
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-glow);
-        }
-
-        .employees-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .employee-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .employee-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .employee-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .employee-card:hover::before {
-            opacity: 1;
-        }
-
-        .employee-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--card-border);
-        }
-
-        .employee-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .equipment-list {
-            display: grid;
-            gap: 0.75rem;
-        }
-
-        .equipment-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .equipment-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--accent);
-        }
-
-        .equipment-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-        }
-
-        .equipment-icon {
-            font-size: 1.5rem;
-        }
-
-        .equipment-details {
-            flex: 1;
-        }
-
-        .equipment-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .equipment-expiry {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-            white-space: nowrap;
-        }
-
-        .badge-success {
-            background: linear-gradient(135deg, var(--success) 0%, #00cc7f 100%);
-            color: var(--primary);
-        }
-
-        .badge-warning {
-            background: linear-gradient(135deg, var(--warning) 0%, #ffaa00 100%);
-            color: var(--primary);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .badge-danger {
-            background: linear-gradient(135deg, var(--danger) 0%, #cc0055 100%);
-            color: white;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .badge-none {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-        }
-
-        .employee-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--card-border);
-        }
-
-        .btn-edit, .btn-delete {
-            flex: 1;
-            padding: 0.6rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.75rem;
-        }
-
-        .btn-edit {
-            background: linear-gradient(135deg, #0099ff 0%, #0066cc 100%);
-            color: white;
-        }
-
-        .btn-edit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 153, 255, 0.4);
-        }
-
-        .btn-delete {
-            background: rgba(255, 0, 110, 0.2);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-        }
-
-        .btn-delete:hover {
-            background: var(--danger);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .modal {
-            background: var(--card-bg);
-            backdrop-filter: blur(30px);
-            border: 2px solid var(--accent);
-            border-radius: 20px;
-            padding: 2.5rem;
-            max-width: 700px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(255, 107, 0, 0.4);
-            animation: slideIn 0.4s ease-out;
-        }
-
-        .modal-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .equipment-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .equipment-section h3 {
-            color: var(--accent);
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .equipment-fields {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .checkbox-field {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .checkbox-field input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .modal-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-confirm {
-            background: linear-gradient(135deg, var(--success) 0%, #00cc7f 100%);
-            color: var(--primary);
-            padding: 1rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 10px 30px rgba(0, 255, 159, 0.3);
-        }
-
-        .btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(0, 255, 159, 0.5);
-        }
-
-        .btn-cancel {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            border: 1px solid var(--card-border);
-            padding: 1rem;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .btn-cancel:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        .notification {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--success);
-            color: var(--text-primary);
-            padding: 1.5rem 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 255, 159, 0.3);
-            z-index: 3000;
-            animation: slideIn 0.4s ease-out;
-            max-width: 400px;
-        }
-
-        .notification.error {
-            border-color: var(--danger);
-            box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
-        }
-
-        .notification.info {
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .header h1 { font-size: 2rem; }
-            .header .subtitle { font-size: 1.125rem; }
-            .employees-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .user-bar { flex-direction: column; gap: 1rem; }
-            .btn-sm { width: 100%; }
-            .notification { left: 1rem; right: 1rem; }
-            .equipment-fields { grid-template-columns: 1fr; }
-            .modal-buttons { grid-template-columns: 1fr; }
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EPI STOCK — RTE</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+/* ════════════════════════════════════════════
+   RESET & VARS
+   ════════════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#050709;
+  --surface:#0d1117;
+  --surface2:#161b22;
+  --surface3:#1c2333;
+  --accent:#00e5ff;
+  --accent-dim:rgba(0,229,255,.12);
+  --accent-glow:rgba(0,229,255,.35);
+  --green:#39ff14;
+  --green-dim:rgba(57,255,20,.12);
+  --amber:#ffb300;
+  --amber-dim:rgba(255,179,0,.12);
+  --red:#ff3b5c;
+  --red-dim:rgba(255,59,92,.12);
+  --text:#c9d1d9;
+  --text-bright:#e6edf3;
+  --text-dim:#484f58;
+  --border:rgba(255,255,255,.06);
+  --border-hover:rgba(0,229,255,.25);
+  --radius:14px;
+  --font-head:'Rajdhani',sans-serif;
+  --font-body:'Exo 2',sans-serif;
+  --font-mono:'Share Tech Mono',monospace;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* ════════════════════════════════════════════
+   CANVAS BG (particules)
+   ════════════════════════════════════════════ */
+#bgCanvas{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+}
+
+/* ════════════════════════════════════════════
+   GRID OVERLAY subtle
+   ════════════════════════════════════════════ */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  pointer-events:none;opacity:.025;
+  background-image:
+    linear-gradient(var(--accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent) 1px, transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ════════════════════════════════════════════
+   LAYOUT
+   ════════════════════════════════════════════ */
+.app{position:relative;z-index:1;min-height:100vh}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:sticky;top:0;z-index:200;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+  background:rgba(5,7,9,.82);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-logo{
+  display:flex;align-items:center;gap:12px;
+  text-decoration:none;
+}
+.topbar-logo .icon-wrap{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--accent),#7c4dff);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 0 16px var(--accent-glow);
+}
+.topbar-logo h1{
+  font-family:var(--font-head);
+  font-size:1.35rem;font-weight:700;
+  letter-spacing:.08em;color:var(--text-bright);
+}
+.topbar-logo h1 span{color:var(--accent)}
+
+.topbar-right{display:flex;align-items:center;gap:16px}
+.topbar-user{
+  display:none;align-items:center;gap:10px;
+  font-size:.82rem;color:var(--text-dim);
+  font-family:var(--font-mono);
+}
+.topbar-user.visible{display:flex}
+.topbar-user .avatar{
+  width:30px;height:30px;border-radius:6px;
+  background:var(--surface3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+
+/* ── MAIN ── */
+.main{max-width:1440px;margin:0 auto;padding:28px 32px 60px}
+
+/* ════════════════════════════════════════════
+   LOGIN PAGE
+   ════════════════════════════════════════════ */
+#loginPage{
+  min-height:calc(100vh - 64px);
+  display:flex;align-items:center;justify-content:center;
+  padding:40px 20px;
+}
+.login-card{
+  width:100%;max-width:420px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:48px 36px;
+  position:relative;overflow:hidden;
+  animation:cardPop .5s cubic-bezier(.22,.68,0,1.2) both;
+}
+@keyframes cardPop{
+  from{opacity:0;transform:translateY(40px) scale(.96)}
+  to  {opacity:1;transform:translateY(0)  scale(1)}
+}
+.login-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;
+  background:radial-gradient(circle,var(--accent-dim),transparent 70%);
+  pointer-events:none;
+}
+.login-card::after{
+  content:'';position:absolute;bottom:-40px;left:-40px;
+  width:150px;height:150px;
+  background:radial-gradient(circle,rgba(124,77,255,.1),transparent 70%);
+  pointer-events:none;
+}
+
+.login-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent-dim);border:1px solid rgba(0,229,255,.2);
+  border-radius:20px;padding:5px 14px;
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--accent);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:28px;
+}
+.login-badge .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 6px var(--green);
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.login-card h2{
+  font-family:var(--font-head);
+  font-size:1.7rem;font-weight:700;color:var(--text-bright);
+  margin-bottom:6px;letter-spacing:.04em;
+}
+.login-card p{font-size:.82rem;color:var(--text-dim);margin-bottom:32px}
+
+.input-wrap{position:relative;margin-bottom:20px}
+.input-wrap label{
+  display:block;font-size:.7rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:8px;
+  font-family:var(--font-mono);
+}
+.input-wrap input{
+  width:100%;padding:13px 16px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:.92rem;color:var(--text-bright);
+  font-family:var(--font-body);
+  transition:border-color .3s,box-shadow .3s;
+  outline:none;
+}
+.input-wrap input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-dim);
+}
+.input-wrap input::placeholder{color:var(--text-dim)}
+
+.btn-login{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--accent),#7c4dff);
+  border:none;border-radius:10px;
+  font-family:var(--font-head);
+  font-size:1rem;font-weight:700;
+  color:#fff;letter-spacing:.12em;text-transform:uppercase;
+  cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:transform .25s,box-shadow .3s;
+  box-shadow:0 4px 24px var(--accent-glow);
+}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--accent-glow)}
+.btn-login::after{
+  content:'';position:absolute;top:0;left:-100%;
+  width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  transition:left .55s;
+}
+.btn-login:hover::after{left:140%}
+
+/* ════════════════════════════════════════════
+   MAIN PAGE
+   ════════════════════════════════════════════ */
+#mainPage{display:none}
+#mainPage.visible{display:block;animation:fadeIn .4s ease both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── STATS ROW ── */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-bottom:28px;
+}
+.stat-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px 22px;
+  position:relative;overflow:hidden;
+  transition:border-color .35s,transform .3s;
+  animation:statIn .55s cubic-bezier(.22,.68,0,1.2) both;
+}
+.stat-card:nth-child(1){animation-delay:.05s}
+.stat-card:nth-child(2){animation-delay:.12s}
+.stat-card:nth-child(3){animation-delay:.19s}
+.stat-card:nth-child(4){animation-delay:.26s}
+@keyframes statIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+.stat-card:hover{border-color:var(--border-hover);transform:translateY(-3px)}
+.stat-card .corner{
+  position:absolute;top:0;right:0;
+  width:48px;height:48px;
+  opacity:.35;
+}
+.stat-card .corner svg{width:100%;height:100%}
+
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stat-icon{
+  width:38px;height:38px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.stat-icon.blue{background:var(--accent-dim)}
+.stat-icon.amber{background:var(--amber-dim)}
+.stat-icon.red{background:var(--red-dim)}
+.stat-icon.green{background:var(--green-dim)}
+
+.stat-trend{
+  font-family:var(--font-mono);font-size:.68rem;
+  padding:3px 8px;border-radius:4px;
+}
+.stat-trend.up{background:var(--green-dim);color:var(--green)}
+.stat-trend.warn{background:var(--amber-dim);color:var(--amber)}
+.stat-trend.bad{background:var(--red-dim);color:var(--red)}
+
+.stat-value{
+  font-family:var(--font-head);
+  font-size:2.1rem;font-weight:700;color:var(--text-bright);
+  line-height:1;
+}
+.stat-label{
+  font-size:.72rem;color:var(--text-dim);
+  font-family:var(--font-mono);letter-spacing:.06em;
+  margin-top:6px;
+}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:14px;margin-bottom:20px;flex-wrap:wrap;
+}
+.toolbar-left{display:flex;align-items:center;gap:14px;flex:1}
+.search-wrap{
+  flex:1;max-width:380px;position:relative;
+}
+.search-wrap .s-icon{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  color:var(--text-dim);font-size:15px;pointer-events:none;
+}
+.search-wrap input{
+  width:100%;padding:10px 16px 10px 38px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;font-size:.85rem;color:var(--text-bright);
+  font-family:var(--font-body);outline:none;
+  transition:border-color .3s,box-shadow .3s;
+}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.search-wrap input::placeholder{color:var(--text-dim)}
+
+.filter-pills{display:flex;gap:8px}
+.pill{
+  padding:7px 16px;border-radius:20px;
+  border:1px solid var(--border);background:var(--surface2);
+  font-size:.75rem;color:var(--text-dim);
+  font-family:var(--font-mono);cursor:pointer;
+  transition:all .25s;white-space:nowrap;
+}
+.pill:hover{border-color:var(--border-hover);color:var(--accent)}
+.pill.active{
+  background:var(--accent-dim);border-color:rgba(0,229,255,.3);
+  color:var(--accent);
+}
+
+.btn-add{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 20px;
+  background:linear-gradient(135deg,var(--accent),#7c4dff);
+  border:none;border-radius:10px;
+  font-family:var(--font-head);font-size:.88rem;font-weight:600;
+  color:#fff;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;white-space:nowrap;
+  transition:transform .25s,box-shadow .3s;
+  box-shadow:0 3px 16px var(--accent-glow);
+}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 6px 24px var(--accent-glow)}
+.btn-add .plus{font-size:18px;line-height:1}
+
+/* ── EMPLOYEE GRID ── */
+.emp-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(420px,1fr));
+  gap:14px;
+}
+.emp-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:border-color .35s,transform .3s,box-shadow .35s;
+  animation:cardSlide .5s cubic-bezier(.22,.68,0,1.2) both;
+}
+.emp-card:hover{
+  border-color:var(--border-hover);
+  transform:translateY(-4px);
+  box-shadow:0 12px 40px rgba(0,229,255,.1);
+}
+
+/* top accent bar animation */
+.emp-card .card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c4dff,var(--accent));
+  background-size:200% 100%;
+  animation:barShift 3s linear infinite;
+  opacity:0;transition:opacity .35s;
+}
+.emp-card:hover .card-bar{opacity:1}
+@keyframes barShift{from{background-position:0% 0%}to{background-position:200% 0%}}
+@keyframes cardSlide{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+.card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px 12px;
+}
+.card-head-left{display:flex;align-items:center;gap:12px}
+.card-avatar{
+  width:38px;height:38px;border-radius:9px;
+  background:var(--surface3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  transition:transform .3s;
+}
+.emp-card:hover .card-avatar{transform:scale(1.08)}
+.card-name{
+  font-family:var(--font-head);
+  font-size:1.05rem;font-weight:600;color:var(--text-bright);
+  letter-spacing:.02em;
+}
+.card-id{
+  font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:1px
+}
+.card-actions{display:flex;gap:6px}
+.ic-btn{
+  width:32px;height:32px;border-radius:7px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;
+  transition:all .22s;
+}
+.ic-btn:hover{border-color:var(--border-hover);color:var(--accent);background:var(--accent-dim)}
+.ic-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+
+/* equipment rows */
+.eq-list{padding:0 18px 18px}
+.eq-row{
+  display:flex;align-items:center;
+  padding:9px 12px;margin-bottom:5px;
+  border-radius:8px;
+  background:var(--surface2);
+  border:1px solid transparent;
+  transition:border-color .25s,background .25s;
+}
+.eq-row:hover{border-color:var(--border);background:var(--surface3)}
+.eq-row:last-child{margin-bottom:0}
+
+.eq-icon{width:28px;text-align:center;font-size:16px;flex-shrink:0}
+.eq-mid{flex:1;min-width:0;margin-left:10px}
+.eq-name{font-size:.82rem;font-weight:500;color:var(--text-bright)}
+.eq-exp{font-family:var(--font-mono);font-size:.66rem;color:var(--text-dim);margin-top:1px}
+
+/* status badges */
+.status{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:5px;
+  font-family:var(--font-mono);font-size:.66rem;font-weight:600;
+  white-space:nowrap;
+}
+.status .s-dot{width:6px;height:6px;border-radius:50%}
+.status.ok{background:var(--green-dim);color:var(--green)}
+.status.ok .s-dot{background:var(--green);box-shadow:0 0 5px var(--green)}
+.status.warn{background:var(--amber-dim);color:var(--amber)}
+.status.warn .s-dot{background:var(--amber);box-shadow:0 0 5px var(--amber);animation:blink 1.6s ease infinite}
+.status.bad{background:var(--red-dim);color:var(--red)}
+.status.bad .s-dot{background:var(--red);box-shadow:0 0 5px var(--red);animation:blink 1.2s ease infinite}
+.status.none{background:var(--surface3);color:var(--text-dim)}
+.status.none .s-dot{background:var(--text-dim)}
+
+/* empty state */
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:80px 20px;
+  color:var(--text-dim);font-size:.9rem;
+}
+.empty-state .empty-icon{font-size:3rem;margin-bottom:16px;opacity:.4}
+
+/* ════════════════════════════════════════════
+   MODAL
+   ════════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(5,7,9,.85);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .25s ease both;
+}
+.modal{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  width:90%;max-width:660px;max-height:88vh;overflow-y:auto;
+  padding:32px;
+  animation:modalPop .38s cubic-bezier(.22,.68,0,1.2) both;
+  position:relative;
+}
+@keyframes modalPop{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.modal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.modal-title{
+  font-family:var(--font-head);font-size:1.4rem;font-weight:700;
+  color:var(--text-bright);display:flex;align-items:center;gap:10px;
+}
+.modal-title .m-icon{
+  width:34px;height:34px;border-radius:8px;
+  background:var(--accent-dim);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.modal-close{
+  width:32px;height:32px;border-radius:7px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;transition:all .2s;
+}
+.modal-close:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+
+/* name input big */
+.modal .input-wrap input{background:var(--surface2)}
+
+/* equipment sections in modal */
+.eq-section{
+  border:1px solid var(--border);border-radius:11px;
+  padding:16px;margin-bottom:12px;
+  transition:border-color .3s;
+}
+.eq-section:focus-within{border-color:var(--border-hover)}
+.eq-section-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.eq-section-head .s-ico{font-size:18px}
+.eq-section-head span{
+  font-family:var(--font-head);font-size:.92rem;font-weight:600;
+  color:var(--text-bright);
+}
+.eq-row-modal{
+  display:flex;align-items:center;gap:14px;
+}
+.toggle-wrap{
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;width:140px;
+}
+.toggle{
+  position:relative;width:42px;height:23px;cursor:pointer;
+}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{
+  position:absolute;inset:0;
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:12px;
+  transition:background .3s,border-color .3s;
+}
+.toggle .slider::before{
+  content:'';position:absolute;
+  width:17px;height:17px;border-radius:50%;
+  background:#fff;left:2px;bottom:2px;
+  transition:transform .3s cubic-bezier(.22,.68,0,1.2);
+  box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.toggle input:checked+.slider{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked+.slider::before{transform:translateX(19px)}
+
+.toggle-label{font-size:.78rem;color:var(--text-dim);font-family:var(--font-mono)}
+
+.eq-date-wrap{flex:1}
+.eq-date-wrap input[type=date]{
+  width:100%;padding:9px 12px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text-bright);
+  font-family:var(--font-body);font-size:.84rem;outline:none;
+  transition:border-color .3s,box-shadow .3s;
+}
+.eq-date-wrap input[type=date]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.eq-date-wrap input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+
+/* modal buttons */
+.modal-btns{
+  display:flex;gap:10px;margin-top:26px;
+}
+.btn-modal-cancel{
+  flex:1;padding:11px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);
+  font-family:var(--font-head);font-size:.9rem;font-weight:600;
+  cursor:pointer;transition:all .22s;letter-spacing:.06em;
+}
+.btn-modal-cancel:hover{border-color:var(--red);color:var(--red)}
+.btn-modal-save{
+  flex:2;padding:11px;
+  background:linear-gradient(135deg,var(--accent),#7c4dff);
+  border:none;border-radius:9px;color:#fff;
+  font-family:var(--font-head);font-size:.92rem;font-weight:700;
+  cursor:pointer;letter-spacing:.08em;text-transform:uppercase;
+  transition:transform .22s,box-shadow .3s;
+  box-shadow:0 3px 16px var(--accent-glow);
+}
+.btn-modal-save:hover{transform:translateY(-2px);box-shadow:0 6px 24px var(--accent-glow)}
+
+/* confirm modal */
+.confirm-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(5,7,9,.88);
+  backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .2s ease both;
+}
+.confirm-box{
+  background:var(--surface);border:1px solid var(--red-dim);
+  border-radius:18px;padding:36px;
+  max-width:380px;width:90%;text-align:center;
+  animation:modalPop .35s cubic-bezier(.22,.68,0,1.2) both;
+}
+.confirm-box .c-icon{font-size:2.6rem;margin-bottom:14px}
+.confirm-box h3{
+  font-family:var(--font-head);font-size:1.2rem;color:var(--text-bright);margin-bottom:8px
+}
+.confirm-box p{font-size:.82rem;color:var(--text-dim);margin-bottom:24px}
+.confirm-btns{display:flex;gap:10px}
+.btn-c-cancel{
+  flex:1;padding:10px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-head);font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.btn-c-cancel:hover{border-color:var(--border-hover);color:var(--accent)}
+.btn-c-del{
+  flex:1;padding:10px;background:var(--red-dim);
+  border:1px solid var(--red);border-radius:8px;
+  color:var(--red);font-family:var(--font-head);font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:all .2s;
+}
+.btn-c-del:hover{background:var(--red);color:#fff}
+
+/* ════════════════════════════════════════════
+   TOAST
+   ════════════════════════════════════════════ */
+.toast{
+  position:fixed;top:24px;right:24px;z-index:900;
+  background:var(--surface);border:1px solid var(--green);
+  border-radius:12px;padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  animation:toastIn .38s cubic-bezier(.22,.68,0,1.2) both;
+  max-width:360px;
+}
+.toast.error{border-color:var(--red)}
+.toast.info{border-color:var(--accent)}
+.toast .t-icon{font-size:18px;flex-shrink:0}
+.toast .t-msg{font-size:.82rem;color:var(--text-bright);font-family:var(--font-body)}
+.toast .t-close{
+  margin-left:auto;width:22px;height:22px;
+  border-radius:5px;border:1px solid var(--border);background:var(--surface2);
+  color:var(--text-dim);display:flex;align-items:center;justify-content:center;
+  font-size:12px;cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.toast .t-close:hover{border-color:var(--red);color:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.toast.out{animation:toastOut .3s ease forwards}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
+
+/* ════════════════════════════════════════════
+   SCROLLBAR
+   ════════════════════════════════════════════ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-hover)}
+
+/* ════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════ */
+@media(max-width:900px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .emp-grid{grid-template-columns:1fr}
+  .main{padding:20px 18px 60px}
+  .topbar{padding:0 18px}
+}
+@media(max-width:560px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .toolbar-left{flex-direction:column;align-items:stretch}
+  .search-wrap{max-width:100%}
+  .filter-pills{overflow-x:auto;padding-bottom:4px}
+  .modal{padding:24px 18px}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>RTE EPI INVENTAIRE</h1>
-            <div class="subtitle">Inventaire EPI RTE par Nassim KETFI</div>
-            <p>Géstion des EPI fait par Nassim Ketfi avec l'aide des idée de Christian Loko</p>
-        </div>
 
-        <!-- Login Page -->
-        <div id="loginPage">
-            <div class="auth-card">
-                <div class="form-group">
-                    <label for="adminPassword"> Mot de passe</label>
-                    <input type="password" id="adminPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') login()">
-                </div>
-                <button class="btn btn-primary" onclick="login()">Se connecter</button>
-            </div>
-        </div>
+<!-- Particule Canvas -->
+<canvas id="bgCanvas"></canvas>
 
-        <!-- Main Page -->
-        <div id="mainPage" class="hidden">
-            <div class="user-bar">
-                <div class="user-info">
-                    <div class="user-avatar">🔐</div>
-                    <div class="user-name">Administrateur RTE</div>
-                </div>
-                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalEmployees">0</div>
-                    <div class="stat-label">Employés</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="expiringCount">0</div>
-                    <div class="stat-label">Exp. < 30 jours</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="expiredCount">0</div>
-                    <div class="stat-label">Expirés</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalEquipments">0</div>
-                    <div class="stat-label">Total EPI</div>
-                </div>
-            </div>
-
-            <div class="section-header">
-                <div class="section-title">
-                    <span class="section-icon">👥</span>
-                    <span>Employés et Équipements</span>
-                </div>
-                <button class="btn btn-primary btn-sm" onclick="showAddModal()">
-                    ➕ Ajouter employé
-                </button>
-            </div>
-
-            <div class="search-bar">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher un employé..." oninput="filterEmployees()">
-            </div>
-
-            <div id="employeesGrid" class="employees-grid"></div>
-        </div>
+<div class="app">
+  <!-- TOP BAR -->
+  <nav class="topbar">
+    <div class="topbar-logo">
+      <div class="icon-wrap">🛡️</div>
+      <h1>EPI <span>STOCK</span></h1>
     </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="topbarUser">
+        <div class="avatar">👤</div>
+        <span>Admin · RTE</span>
+      </div>
+      <button class="ic-btn" id="logoutBtn" style="display:none" onclick="logout()" title="Déconnexion">⏻</button>
+    </div>
+  </nav>
 
-    <script type="module">
-        // ============================================
-        // IMPORTS FIREBASE
-        // ============================================
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js';
-        import { 
-            getFirestore, 
-            collection, 
-            getDocs, 
-            doc, 
-            updateDoc, 
-            deleteDoc,
-            addDoc
-        } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
+  <!-- LOGIN -->
+  <div id="loginPage">
+    <div class="login-card">
+      <div class="login-badge"><div class="dot"></div> Système actif</div>
+      <h2>Bienvenue</h2>
+      <p>Connectez-vous pour accéder à l'inventaire EPI</p>
+      <div class="input-wrap">
+        <label>Mot de passe</label>
+        <input type="password" id="adminPassword" placeholder="••••••••••" onkeypress="if(event.key==='Enter')login()">
+      </div>
+      <button class="btn-login" onclick="login()">Se connecter</button>
+    </div>
+  </div>
 
-        // ============================================
-        // CONFIGURATION FIREBASE
-        // ============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyC2R-uRnIyM9ymjhOQW-mUv4_50Pqadjis",
-            authDomain: "rte-epi-inventaire.firebaseapp.com",
-            projectId: "rte-epi-inventaire",
-            storageBucket: "rte-epi-inventaire.firebasestorage.app",
-            messagingSenderId: "987844433606",
-            appId: "1:987844433606:web:0069eb1e5d4bb8480c29c7"
-        };
+  <!-- MAIN -->
+  <div id="mainPage">
+    <div class="main">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon blue">👥</div>
+            <div class="stat-trend up" id="trendEmp">—</div>
+          </div>
+          <div class="stat-value" id="totalEmployees">0</div>
+          <div class="stat-label">Employés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon green">🛡️</div>
+            <div class="stat-trend up" id="trendEq">—</div>
+          </div>
+          <div class="stat-value" id="totalEquipments">0</div>
+          <div class="stat-label">Total EPI</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon amber">⏰</div>
+            <div class="stat-trend warn" id="trendExp">—</div>
+          </div>
+          <div class="stat-value" id="expiringCount">0</div>
+          <div class="stat-label">Exp. &lt; 30 jours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon red">⚠️</div>
+            <div class="stat-trend bad" id="trendBad">—</div>
+          </div>
+          <div class="stat-value" id="expiredCount">0</div>
+          <div class="stat-label">Expirés</div>
+        </div>
+      </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const ADMIN_PASSWORD = 'Congobrazzaville28@';
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-wrap">
+            <span class="s-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Rechercher un employé…" oninput="filterEmployees()">
+          </div>
+          <div class="filter-pills">
+            <button class="pill active" onclick="setFilter('all',this)">Tous</button>
+            <button class="pill" onclick="setFilter('ok',this)">✓ OK</button>
+            <button class="pill" onclick="setFilter('warn',this)">⚠ Attention</button>
+            <button class="pill" onclick="setFilter('bad',this)">✗ Expirés</button>
+          </div>
+        </div>
+        <button class="btn-add" onclick="showModal()"><span class="plus">＋</span> Ajouter</button>
+      </div>
 
-        // ============================================
-        // CONFIGURATION EMAILJS (TOUS TES IDENTIFIANTS)
-        // ============================================
-        const EMAILJS_CONFIG = {
-            serviceId: 'service_7dew8do',
-            templateId: 'template_x942n3m',
-            publicKey: '53VGIxYALR_QqLjgx'
-        };
+      <!-- Employee Grid -->
+      <div class="emp-grid" id="empGrid"></div>
+    </div>
+  </div>
+</div>
 
-        // Initialiser EmailJS
-        (function() {
-            emailjs.init(EMAILJS_CONFIG.publicKey);
-            console.log("📧 EmailJS initialisé avec succès !");
-            console.log("   Service ID:", EMAILJS_CONFIG.serviceId);
-            console.log("   Template ID:", EMAILJS_CONFIG.templateId);
-        })();
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+     ════════════════════════════════════════════ -->
+<!-- Canvas particules -->
+<script>
+(function(){
+  const c=document.getElementById('bgCanvas'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
+  resize();window.addEventListener('resize',resize);
 
-        console.log("🚀 RTE EPI INVENTAIRE - Application démarrée par Nassim KETFI");
+  class P{
+    constructor(){this.reset()}
+    reset(){
+      this.x=Math.random()*W;
+      this.y=Math.random()*H;
+      this.r=Math.random()*1.5+.3;
+      this.vx=(Math.random()-.5)*.4;
+      this.vy=(Math.random()-.5)*.4;
+      this.a=Math.random()*.5+.1;
+    }
+    update(){
+      this.x+=this.vx;this.y+=this.vy;
+      if(this.x<0||this.x>W)this.vx*=-1;
+      if(this.y<0||this.y>H)this.vy*=-1;
+    }
+    draw(){
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,229,255,${this.a})`;
+      ctx.fill();
+    }
+  }
 
-        // ============================================
-        // VARIABLES GLOBALES
-        // ============================================
-        let employeesData = {};
-        let emailsSentToday = new Set();
+  for(let i=0;i<70;i++)pts.push(new P());
 
-        // ============================================
-        // DONNÉES INITIALES
-        // ============================================
-        const initialEmployees = [
-            { name: "Cyrielle VALDENAIRE", casque: true, casqueExp: "2034-05-01", chaussure: true, gilet: true, pantalon: false, polo: false },
-            { name: "Delphine ROGER", casque: true, casqueExp: "2029-02-01", chaussure: true, gilet: false, pantalon: false, polo: false },
-            { name: "Céline TRESCH", casque: true, casqueExp: "2035-03-01", chaussure: true, gilet: true, pantalon: false, polo: false },
-            { name: "Dominique SOUCHE", casque: false, chaussure: false, gilet: false, pantalon: false, polo: false },
-            { name: "Stéphane BELAVAL", casque: true, casqueExp: "2031-02-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Rémi RONDOT", casque: true, casqueExp: "2033-07-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Kevin HANRIOT", casque: true, casqueExp: "2027-07-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Madison PIERRE", casque: true, casqueExp: "2030-01-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Irène GIROUX", casque: true, casqueExp: "2035-03-01", chaussure: true, gilet: true, pantalon: false, polo: false },
-            { name: "Doriane LATZER", casque: true, casqueExp: "2033-04-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Severine SCHUMANN", casque: true, casqueExp: "2031-09-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Cédric BLONDELLE", casque: false, chaussure: false, gilet: false, pantalon: false, polo: false },
-            { name: "Benjamin GOURDOUX", casque: true, casqueExp: "2030-01-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Matthieu CARLIER", casque: true, casqueExp: "2027-12-01", chaussure: true, gilet: true, pantalon: false, polo: false },
-            { name: "Alain PELTRE", casque: true, casqueExp: "2030-05-01", chaussure: true, gilet: true, pantalon: true, polo: true },
-            { name: "Sebastien DUPLAN", casque: true, casqueExp: "2031-12-01", chaussure: true, gilet: true, pantalon: true, polo: false },
-            { name: "Gregory LE-RESTE", casque: true, casqueExp: "2030-08-01", chaussure: true, gilet: true, pantalon: false, polo: false },
-            { name: "Manon DUBOIS", casque: true, casqueExp: "2031-09-01", chaussure: true, gilet: false, pantalon: false, polo: false }
-        ];
-
-        // ============================================
-        // INITIALISER LA BASE AVEC LES DONNÉES
-        // ============================================
-        async function initializeDatabase() {
-            try {
-                const snapshot = await getDocs(collection(db, "employees"));
-                
-                if (snapshot.empty) {
-                    console.log("📦 Initialisation de la base de données...");
-                    
-                    for (const employee of initialEmployees) {
-                        await addDoc(collection(db, "employees"), employee);
-                    }
-                    
-                    console.log("✅ Base de données initialisée avec", initialEmployees.length, "employés");
-                    showNotification(`✅ ${initialEmployees.length} employés initialisés`);
-                } else {
-                    console.log("✅ Base de données déjà initialisée avec", snapshot.size, "employés");
-                }
-            } catch (error) {
-                console.error("❌ Erreur initialisation:", error);
-            }
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    // lines between close particles
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(0,229,255,${(.12)*(1-d/120)})`;
+          ctx.lineWidth=.6;
+          ctx.stroke();
         }
+      }
+    }
+    pts.forEach(p=>{p.update();p.draw()});
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
 
-        // ============================================
-        // FONCTION D'ENVOI D'EMAIL
-        // ============================================
-        async function sendExpiryEmail(employeeName, equipmentName, expiryDate, daysRemaining) {
-            const emailKey = `${employeeName}-${equipmentName}-${expiryDate}`;
-            
-            if (emailsSentToday.has(emailKey)) {
-                console.log("⏭️ Email déjà envoyé aujourd'hui pour:", emailKey);
-                return false;
-            }
+<!-- Firebase + App -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
 
-            try {
-                console.log("📧 Envoi email expiration...", { employeeName, equipmentName, daysRemaining });
+/* ── Firebase config ── */
+const firebaseConfig={
+  apiKey:"AIzaSyC2R-uRnIyM9ymjhOQW-mUv4_50Pqadjis",
+  authDomain:"rte-epi-inventaire.firebaseapp.com",
+  projectId:"rte-epi-inventaire",
+  storageBucket:"rte-epi-inventaire.firebasestorage.app",
+  messagingSenderId:"987844433606",
+  appId:"1:987844433606:web:0069eb1e5d4bb8480c29c7"
+};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const ADMIN_PASSWORD='Congobrazzaville28@';
 
-                const templateParams = {
-                    location: employeeName,
-                    item_name: equipmentName,
-                    date: new Date().toLocaleDateString('fr-FR'),
-                    time: new Date().toLocaleTimeString('fr-FR'),
-                    remaining_stock: `${daysRemaining} jours`,
-                    stock_status: daysRemaining < 0 ? '🔴 EXPIRÉ' : '⚠️ EXPIRATION PROCHE'
-                };
+/* ── EmailJS ── */
+const EJS={serviceId:'service_7dew8do',templateId:'template_x942n3m',publicKey:'53VGIxYALR_QqLjgx'};
+emailjs.init(EJS.publicKey);
 
-                const response = await emailjs.send(
-                    EMAILJS_CONFIG.serviceId,
-                    EMAILJS_CONFIG.templateId,
-                    templateParams
-                );
+/* ── State ── */
+let employeesData={};
+let emailsSentToday=new Set();
+let currentFilter='all';
 
-                console.log('✅ Email envoyé avec succès:', response.status);
-                emailsSentToday.add(emailKey);
-                return true;
+/* ── Initial data ── */
+const initialEmployees=[
+  {name:"Cyrielle VALDENAIRE",casque:true,casqueExp:"2034-05-01",chaussure:true,gilet:true,pantalon:false,polo:false},
+  {name:"Delphine ROGER",casque:true,casqueExp:"2029-02-01",chaussure:true,gilet:false,pantalon:false,polo:false},
+  {name:"Céline TRESCH",casque:true,casqueExp:"2035-03-01",chaussure:true,gilet:true,pantalon:false,polo:false},
+  {name:"Dominique SOUCHE",casque:false,chaussure:false,gilet:false,pantalon:false,polo:false},
+  {name:"Stéphane BELAVAL",casque:true,casqueExp:"2031-02-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Rémi RONDOT",casque:true,casqueExp:"2033-07-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Kevin HANRIOT",casque:true,casqueExp:"2027-07-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Madison PIERRE",casque:true,casqueExp:"2030-01-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Irène GIROUX",casque:true,casqueExp:"2035-03-01",chaussure:true,gilet:true,pantalon:false,polo:false},
+  {name:"Doriane LATZER",casque:true,casqueExp:"2033-04-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Severine SCHUMANN",casque:true,casqueExp:"2031-09-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Cédric BLONDELLE",casque:false,chaussure:false,gilet:false,pantalon:false,polo:false},
+  {name:"Benjamin GOURDOUX",casque:true,casqueExp:"2030-01-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Matthieu CARLIER",casque:true,casqueExp:"2027-12-01",chaussure:true,gilet:true,pantalon:false,polo:false},
+  {name:"Alain PELTRE",casque:true,casqueExp:"2030-05-01",chaussure:true,gilet:true,pantalon:true,polo:true},
+  {name:"Sebastien DUPLAN",casque:true,casqueExp:"2031-12-01",chaussure:true,gilet:true,pantalon:true,polo:false},
+  {name:"Gregory LE-RESTE",casque:true,casqueExp:"2030-08-01",chaussure:true,gilet:true,pantalon:false,polo:false},
+  {name:"Manon DUBOIS",casque:true,casqueExp:"2031-09-01",chaussure:true,gilet:false,pantalon:false,polo:false}
+];
 
-            } catch (error) {
-                console.error('❌ Erreur envoi email:', error);
-                return false;
-            }
-        }
+/* ── Helpers ── */
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function fmtDate(s){if(!s)return'N/A';return new Date(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function daysLeft(exp){if(!exp)return 999;return Math.ceil((new Date(exp)-new Date())/(864e5))}
 
-        // ============================================
-        // VÉRIFIER LES EXPIRATIONS
-        // ============================================
-        async function checkExpirations() {
-            console.log("🔍 Vérification des expirations...");
-            
-            const employees = Object.values(employeesData);
-            const equipmentTypes = [
-                { key: 'casque', name: 'Casque', expKey: 'casqueExp' },
-                { key: 'chaussure', name: 'Chaussure de sécurité', expKey: 'chaussureExp' },
-                { key: 'gilet', name: 'Gilet', expKey: 'giletExp' },
-                { key: 'pantalon', name: 'Pantalon', expKey: 'pantalonExp' },
-                { key: 'polo', name: 'Polo', expKey: 'poloExp' }
-            ];
+function getStatus(hasEq,expDate){
+  if(!hasEq)return{cls:'none',label:'Non équipé',days:null};
+  const d=daysLeft(expDate);
+  if(!expDate)return{cls:'ok',label:'Pas d\'exp.',days:null};
+  if(d<0) return{cls:'bad',label:`Expiré (${Math.abs(d)}j)`,days:d};
+  if(d<=30)return{cls:'bad',label:`${d} jours`,days:d};
+  if(d<=90)return{cls:'warn',label:`${d} jours`,days:d};
+  return{cls:'ok',label:`${d} jours`,days:d};
+}
 
-            let emailsSent = 0;
+/* ── Toast ── */
+function toast(msg,type='success'){
+  const icons={success:'✅',error:'❌',info:'ℹ️'};
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=`<span class="t-icon">${icons[type]||'ℹ️'}</span><span class="t-msg">${msg}</span><span class="t-close" onclick="this.parentElement.remove()">✕</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),350)},3600);
+}
 
-            for (const employee of employees) {
-                for (const equipment of equipmentTypes) {
-                    if (employee[equipment.key] && employee[equipment.expKey]) {
-                        const daysRemaining = getDaysRemaining(employee[equipment.expKey]);
-                        
-                        if (daysRemaining <= 30) {
-                            const sent = await sendExpiryEmail(
-                                employee.name,
-                                equipment.name,
-                                employee[equipment.expKey],
-                                daysRemaining
-                            );
-                            if (sent) emailsSent++;
-                        }
-                    }
-                }
-            }
+/* ── DB Init ── */
+async function initDB(){
+  const snap=await getDocs(collection(db,'employees'));
+  if(snap.empty){
+    for(const e of initialEmployees)await addDoc(collection(db,'employees'),e);
+    toast(`${initialEmployees.length} employés initialisés`,'info');
+  }
+}
 
-            if (emailsSent > 0) {
-                console.log(`✅ ${emailsSent} email(s) d'alerte envoyé(s)`);
-                showNotification(`📧 ${emailsSent} alerte(s) email envoyée(s)`, 'info');
-            } else {
-                console.log("ℹ️ Aucune alerte à envoyer");
-            }
-        }
+/* ── Load ── */
+async function loadEmployees(){
+  const snap=await getDocs(collection(db,'employees'));
+  employeesData={};
+  snap.forEach(d=>employeesData[d.id]={...d.data(),id:d.id});
+  render();
+  updateStats();
+}
 
-        // ============================================
-        // CALCULER JOURS RESTANTS
-        // ============================================
-        function getDaysRemaining(expiryDate) {
-            if (!expiryDate) return 999;
-            const today = new Date();
-            const expiry = new Date(expiryDate);
-            const diffTime = expiry - today;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
+/* ── Stats ── */
+function updateStats(){
+  const emps=Object.values(employeesData);
+  const eqs=[{k:'casque',e:'casqueExp'},{k:'chaussure',e:'chaussureExp'},{k:'gilet',e:'giletExp'},{k:'pantalon',e:'pantalonExp'},{k:'polo',e:'poloExp'}];
+  let totEq=0,exp30=0,expBad=0;
+  emps.forEach(emp=>eqs.forEach(eq=>{
+    if(emp[eq.k]){totEq++;if(emp[eq.e]){const d=daysLeft(emp[eq.e]);if(d<0)expBad++;else if(d<=30)exp30++;}}
+  }));
+  document.getElementById('totalEmployees').textContent=emps.length;
+  document.getElementById('totalEquipments').textContent=totEq;
+  document.getElementById('expiringCount').textContent=exp30;
+  document.getElementById('expiredCount').textContent=expBad;
+  // trends
+  document.getElementById('trendEmp').textContent=emps.length>0?`+${emps.length}`:'0';
+  document.getElementById('trendEq').textContent=totEq>0?`+${totEq}`:'0';
+  document.getElementById('trendExp').textContent=exp30>0?`${exp30}`:'0';
+  document.getElementById('trendBad').textContent=expBad>0?`${expBad}`:'0';
+}
 
-        // ============================================
-        // OBTENIR STATUT EXPIRATION
-        // ============================================
-        function getExpiryStatus(expiryDate) {
-            if (!expiryDate) return { badge: 'badge-none', text: 'Non équipé', icon: '⚪' };
-            
-            const days = getDaysRemaining(expiryDate);
-            
-            if (days < 0) {
-                return { badge: 'badge-danger', text: `Expiré (${Math.abs(days)}j)`, icon: '🔴' };
-            } else if (days <= 30) {
-                return { badge: 'badge-danger', text: `${days} jours`, icon: '🔴' };
-            } else if (days <= 90) {
-                return { badge: 'badge-warning', text: `${days} jours`, icon: '🟡' };
-            } else {
-                return { badge: 'badge-success', text: `${days} jours`, icon: '🟢' };
-            }
-        }
+/* ── Filter pills ── */
+window.setFilter=function(f,el){
+  currentFilter=f;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
 
-        // ============================================
-        // CONNEXION
-        // ============================================
-        window.login = async function() {
-            const pwd = document.getElementById('adminPassword').value;
-            if (pwd === ADMIN_PASSWORD) {
-                document.getElementById('loginPage').classList.add('hidden');
-                document.getElementById('mainPage').classList.remove('hidden');
-                
-                await initializeDatabase();
-                await loadEmployees();
-                await checkExpirations();
-                
-                showNotification('✅ Connexion réussie');
-            } else {
-                showNotification('❌ Mot de passe incorrect', 'error');
-            }
-        };
+/* ── Render cards ── */
+function render(){
+  const grid=document.getElementById('empGrid');
+  grid.innerHTML='';
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  const eqs=[
+    {k:'casque',e:'casqueExp',icon:'🪖',name:'Casque'},
+    {k:'chaussure',e:'chaussureExp',icon:'👞',name:'Chaussures'},
+    {k:'gilet',e:'giletExp',icon:'🦺',name:'Gilet'},
+    {k:'pantalon',e:'pantalonExp',icon:'👖',name:'Pantalon'},
+    {k:'polo',e:'poloExp',icon:'👕',name:'Polo'}
+  ];
 
-        window.logout = function() {
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('loginPage').classList.remove('hidden');
-            document.getElementById('mainPage').classList.add('hidden');
-            showNotification('✅ Déconnecté');
-        };
+  let list=Object.values(employeesData)
+    .filter(e=>e.name.toLowerCase().includes(search))
+    .sort((a,b)=>a.name.localeCompare(b.name));
 
-        // ============================================
-        // CHARGER LES EMPLOYÉS
-        // ============================================
-        async function loadEmployees() {
-            const grid = document.getElementById('employeesGrid');
-            grid.innerHTML = '';
+  // filter logic
+  if(currentFilter!=='all'){
+    list=list.filter(emp=>{
+      const statuses=eqs.map(eq=>getStatus(emp[eq.k],emp[eq.e]).cls);
+      if(currentFilter==='ok') return statuses.every(s=>s==='ok'||s==='none');
+      if(currentFilter==='warn')return statuses.some(s=>s==='warn');
+      if(currentFilter==='bad') return statuses.some(s=>s==='bad');
+      return true;
+    });
+  }
 
-            try {
-                const snapshot = await getDocs(collection(db, "employees"));
-                employeesData = {};
+  if(!list.length){
+    grid.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div>Aucun employé trouvé</div>';
+    return;
+  }
 
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    employeesData[docSnap.id] = { ...data, id: docSnap.id };
-                });
+  list.forEach((emp,i)=>{
+    const card=document.createElement('div');
+    card.className='emp-card';
+    card.style.animationDelay=i*.06+'s';
 
-                displayEmployees();
-                updateStats();
+    let rows='';
+    eqs.forEach(eq=>{
+      const st=getStatus(emp[eq.k],emp[eq.e]);
+      rows+=`<div class="eq-row">
+        <div class="eq-icon">${eq.icon}</div>
+        <div class="eq-mid">
+          <div class="eq-name">${eq.name}</div>
+          <div class="eq-exp">${emp[eq.k]?'Exp : '+fmtDate(emp[eq.e]):'Non équipé'}</div>
+        </div>
+        <div class="status ${st.cls}"><span class="s-dot"></span>${st.label}</div>
+      </div>`;
+    });
 
-                console.log("✅ Employés chargés:", Object.keys(employeesData).length);
-            } catch (error) {
-                console.error("❌ Erreur chargement:", error);
-                showNotification('❌ Erreur lors du chargement', 'error');
-            }
-        }
+    // initials
+    const parts=emp.name.split(' ');
+    const initials=parts.map(p=>p[0]).join('').slice(0,2).toUpperCase();
 
-        // ============================================
-        // AFFICHER LES EMPLOYÉS
-        // ============================================
-        function displayEmployees() {
-            const grid = document.getElementById('employeesGrid');
-            grid.innerHTML = '';
+    card.innerHTML=`
+      <div class="card-bar"></div>
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-avatar">${initials}</div>
+          <div>
+            <div class="card-name">${esc(emp.name)}</div>
+            <div class="card-id">#${emp.id.slice(0,8)}</div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="ic-btn" onclick="showModal('${emp.id}')" title="Modifier">✏️</button>
+          <button class="ic-btn danger" onclick="confirmDelete('${emp.id}','${esc(emp.name)}')" title="Supprimer">🗑️</button>
+        </div>
+      </div>
+      <div class="eq-list">${rows}</div>`;
+    grid.appendChild(card);
+  });
+}
 
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = Object.values(employeesData).filter(emp => 
-                emp.name.toLowerCase().includes(searchTerm)
-            );
+/* ── Search ── */
+window.filterEmployees=function(){render()}
 
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
+/* ── LOGIN / LOGOUT ── */
+window.login=async function(){
+  const pwd=document.getElementById('adminPassword').value;
+  if(pwd===ADMIN_PASSWORD){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('mainPage').classList.add('visible');
+    document.getElementById('topbarUser').classList.add('visible');
+    document.getElementById('logoutBtn').style.display='flex';
+    await initDB();
+    await loadEmployees();
+    await checkExpirations();
+    toast('Connexion réussie');
+  } else {
+    toast('Mot de passe incorrect','error');
+  }
+}
 
-            filtered.forEach((employee, index) => {
-                const card = createEmployeeCard(employee, index);
-                grid.appendChild(card);
-            });
+window.logout=function(){
+  document.getElementById('adminPassword').value='';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('mainPage').classList.remove('visible');
+  document.getElementById('topbarUser').classList.remove('visible');
+  document.getElementById('logoutBtn').style.display='none';
+  toast('Déconnecté','info');
+}
 
-            if (filtered.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Aucun employé trouvé</div>';
-            }
-        }
+/* ── MODAL add/edit ── */
+window.showModal=function(empId=null){
+  const emp=empId?employeesData[empId]:{};
+  const isEdit=!!empId;
+  const eqs=[
+    {k:'casque',e:'casqueExp',icon:'🪖',label:'Casque'},
+    {k:'chaussure',e:'chaussureExp',icon:'👞',label:'Chaussures de sécurité'},
+    {k:'gilet',e:'giletExp',icon:'🦺',label:'Gilet de visibilité'},
+    {k:'pantalon',e:'pantalonExp',icon:'👖',label:'Pantalon'},
+    {k:'polo',e:'poloExp',icon:'👕',label:'Polo'}
+  ];
+  let eqHTML=eqs.map(eq=>`
+    <div class="eq-section">
+      <div class="eq-section-head"><span class="s-ico">${eq.icon}</span><span>${eq.label}</span></div>
+      <div class="eq-row-modal">
+        <div class="toggle-wrap">
+          <label class="toggle"><input type="checkbox" id="has_${eq.k}" ${emp[eq.k]?'checked':''}><span class="slider"></span></label>
+          <span class="toggle-label">${emp[eq.k]?'Oui':'Non'}</span>
+        </div>
+        <div class="eq-date-wrap">
+          <input type="date" id="exp_${eq.k}" value="${emp[eq.e]||''}">
+        </div>
+      </div>
+    </div>`).join('');
 
-        // ============================================
-        // CRÉER CARTE EMPLOYÉ
-        // ============================================
-        function createEmployeeCard(employee, index) {
-            const card = document.createElement('div');
-            card.className = 'employee-card';
-            card.style.animationDelay = `${index * 0.05}s`;
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';overlay.id='modalOverlay';
+  overlay.innerHTML=`<div class="modal">
+    <div class="modal-top">
+      <div class="modal-title"><div class="m-icon">${isEdit?'✏️':'➕'}</div>${isEdit?'Modifier':'Ajouter un employé'}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="input-wrap">
+      <label>Nom complet</label>
+      <input type="text" id="empName" value="${emp.name||''}" placeholder="Ex : Jean DUPONT">
+    </div>
+    ${eqHTML}
+    <div class="modal-btns">
+      <button class="btn-modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-modal-save" onclick="saveEmp('${empId||''}')">
+        ${isEdit?'Mettre à jour':'Ajouter'}
+      </button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
 
-            const equipments = [
-                { key: 'casque', icon: '🪖', name: 'Casque', expKey: 'casqueExp' },
-                { key: 'chaussure', icon: '👞', name: 'Chaussure', expKey: 'chaussureExp' },
-                { key: 'gilet', icon: '🦺', name: 'Gilet', expKey: 'giletExp' },
-                { key: 'pantalon', icon: '👖', name: 'Pantalon', expKey: 'pantalonExp' },
-                { key: 'polo', icon: '👕', name: 'Polo', expKey: 'poloExp' }
-            ];
+  // live toggle label update
+  document.querySelectorAll('.toggle input').forEach(inp=>{
+    inp.addEventListener('change',function(){
+      this.parentElement.nextElementSibling.textContent=this.checked?'Oui':'Non';
+    });
+  });
+}
 
-            let equipmentHTML = '';
-            equipments.forEach(eq => {
-                const status = employee[eq.key] ? getExpiryStatus(employee[eq.expKey]) : { badge: 'badge-none', text: 'Non équipé', icon: '⚪' };
-                const expiryText = employee[eq.expKey] ? formatDate(employee[eq.expKey]) : 'N/A';
-                
-                equipmentHTML += `
-                    <div class="equipment-item">
-                        <div class="equipment-info">
-                            <span class="equipment-icon">${eq.icon}</span>
-                            <div class="equipment-details">
-                                <div class="equipment-name">${eq.name}</div>
-                                <div class="equipment-expiry">${employee[eq.key] ? 'Exp: ' + expiryText : 'Non équipé'}</div>
-                            </div>
-                        </div>
-                        <div class="badge ${status.badge}">${status.icon} ${status.text}</div>
-                    </div>
-                `;
-            });
+window.closeModal=function(){
+  const m=document.getElementById('modalOverlay');if(m)m.remove();
+}
 
-            card.innerHTML = `
-                <div class="employee-header">
-                    <div class="employee-name">
-                        👤 ${escapeHtml(employee.name)}
-                    </div>
-                </div>
-                <div class="equipment-list">
-                    ${equipmentHTML}
-                </div>
-                <div class="employee-actions">
-                    <button class="btn-edit" onclick="editEmployee('${employee.id}')">
-                        ✏️ Modifier
-                    </button>
-                    <button class="btn-delete" onclick="deleteEmployee('${employee.id}', '${escapeHtml(employee.name)}')">
-                        🗑️ Supprimer
-                    </button>
-                </div>
-            `;
+/* ── Save ── */
+window.saveEmp=async function(empId){
+  const name=document.getElementById('empName').value.trim();
+  if(!name){toast('Veuillez entrer un nom','error');return;}
+  const eqs=['casque','chaussure','gilet','pantalon','polo'];
+  const data={name};
+  eqs.forEach(k=>{
+    data[k]=document.getElementById('has_'+k).checked;
+    data[k+'Exp']=document.getElementById('exp_'+k).value||null;
+  });
+  try{
+    if(empId){await updateDoc(doc(db,'employees',empId),data);toast('Employé mis à jour');}
+    else{await addDoc(collection(db,'employees'),data);toast('Employé ajouté');}
+    closeModal();await loadEmployees();await checkExpirations();
+  }catch(e){console.error(e);toast('Erreur lors de la sauvegarde','error');}
+}
 
-            return card;
-        }
+/* ── Confirm Delete ── */
+window.confirmDelete=function(id,name){
+  const overlay=document.createElement('div');
+  overlay.className='confirm-overlay';overlay.id='confirmOverlay';
+  overlay.innerHTML=`<div class="confirm-box">
+    <div class="c-icon">⚠️</div>
+    <h3>Supprimer ${name} ?</h3>
+    <p>Cette action est définitive et ne peut pas être annulée.</p>
+    <div class="confirm-btns">
+      <button class="btn-c-cancel" onclick="document.getElementById('confirmOverlay').remove()">Annuler</button>
+      <button class="btn-c-del" onclick="doDelete('${id}','${name}')">Supprimer</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
 
-        // ============================================
-        // METTRE À JOUR STATISTIQUES
-        // ============================================
-        function updateStats() {
-            const employees = Object.values(employeesData);
-            const total = employees.length;
-            let totalEquipments = 0;
-            let expiring = 0;
-            let expired = 0;
+window.doDelete=async function(id,name){
+  try{
+    await deleteDoc(doc(db,'employees',id));
+    document.getElementById('confirmOverlay').remove();
+    toast(`${name} supprimé`);
+    await loadEmployees();
+  }catch(e){console.error(e);toast('Erreur','error');}
+}
 
-            const equipmentKeys = [
-                { key: 'casque', expKey: 'casqueExp' },
-                { key: 'chaussure', expKey: 'chaussureExp' },
-                { key: 'gilet', expKey: 'giletExp' },
-                { key: 'pantalon', expKey: 'pantalonExp' },
-                { key: 'polo', expKey: 'poloExp' }
-            ];
+/* ── Email expiry ── */
+async function sendExpiryEmail(empName,eqName,expDate,days){
+  const key=`${empName}-${eqName}-${expDate}`;
+  if(emailsSentToday.has(key))return false;
+  try{
+    await emailjs.send(EJS.serviceId,EJS.templateId,{
+      location:empName,item_name:eqName,
+      date:new Date().toLocaleDateString('fr-FR'),
+      time:new Date().toLocaleTimeString('fr-FR'),
+      remaining_stock:`${days} jours`,
+      stock_status:days<0?'🔴 EXPIRÉ':'⚠️ EXPIRATION PROCHE'
+    });
+    emailsSentToday.add(key);return true;
+  }catch(e){console.error(e);return false;}
+}
 
-            employees.forEach(emp => {
-                equipmentKeys.forEach(eq => {
-                    if (emp[eq.key]) {
-                        totalEquipments++;
-                        if (emp[eq.expKey]) {
-                            const days = getDaysRemaining(emp[eq.expKey]);
-                            if (days < 0) {
-                                expired++;
-                            } else if (days <= 30) {
-                                expiring++;
-                            }
-                        }
-                    }
-                });
-            });
+async function checkExpirations(){
+  const eqs=[{k:'casque',n:'Casque',e:'casqueExp'},{k:'chaussure',n:'Chaussure',e:'chaussureExp'},{k:'gilet',n:'Gilet',e:'giletExp'},{k:'pantalon',n:'Pantalon',e:'pantalonExp'},{k:'polo',n:'Polo',e:'poloExp'}];
+  let sent=0;
+  for(const emp of Object.values(employeesData)){
+    for(const eq of eqs){
+      if(emp[eq.k]&&emp[eq.e]){
+        const d=daysLeft(emp[eq.e]);
+        if(d<=30&&await sendExpiryEmail(emp.name,eq.n,emp[eq.e],d))sent++;
+      }
+    }
+  }
+  if(sent>0)toast(`${sent} alerte(s) email envoyée(s)`,'info');
+}
 
-            document.getElementById('totalEmployees').textContent = total;
-            document.getElementById('expiringCount').textContent = expiring;
-            document.getElementById('expiredCount').textContent = expired;
-            document.getElementById('totalEquipments').textContent = totalEquipments;
-        }
-
-        // ============================================
-        // MODAL AJOUT/MODIFICATION
-        // ============================================
-        window.showAddModal = function(employeeId = null) {
-            const isEdit = employeeId !== null;
-            const employee = isEdit ? employeesData[employeeId] : {};
-
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.id = 'employeeModal';
-
-            modal.innerHTML = `
-                <div class="modal">
-                    <h2 class="modal-title">${isEdit ? '✏️ Modifier' : '➕ Ajouter'} un employé</h2>
-                    
-                    <div class="form-group">
-                        <label>👤 Nom de l'employé</label>
-                        <input type="text" id="empName" value="${employee.name || ''}" placeholder="Ex: Jean DUPONT">
-                    </div>
-
-                    <div class="equipment-section">
-                        <h3>🪖 Casque</h3>
-                        <div class="equipment-fields">
-                            <div class="checkbox-field">
-                                <input type="checkbox" id="hasCasque" ${employee.casque ? 'checked' : ''}>
-                                <label>Possède un casque</label>
-                            </div>
-                            <div class="form-group">
-                                <label>Date d'expiration</label>
-                                <input type="date" id="casqueExp" value="${employee.casqueExp || ''}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="equipment-section">
-                        <h3>👞 Chaussure de sécurité</h3>
-                        <div class="equipment-fields">
-                            <div class="checkbox-field">
-                                <input type="checkbox" id="hasChaussure" ${employee.chaussure ? 'checked' : ''}>
-                                <label>Possède des chaussures</label>
-                            </div>
-                            <div class="form-group">
-                                <label>Date d'expiration</label>
-                                <input type="date" id="chaussureExp" value="${employee.chaussureExp || ''}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="equipment-section">
-                        <h3>🦺 Gilet</h3>
-                        <div class="equipment-fields">
-                            <div class="checkbox-field">
-                                <input type="checkbox" id="hasGilet" ${employee.gilet ? 'checked' : ''}>
-                                <label>Possède un gilet</label>
-                            </div>
-                            <div class="form-group">
-                                <label>Date d'expiration</label>
-                                <input type="date" id="giletExp" value="${employee.giletExp || ''}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="equipment-section">
-                        <h3>👖 Pantalon</h3>
-                        <div class="equipment-fields">
-                            <div class="checkbox-field">
-                                <input type="checkbox" id="hasPantalon" ${employee.pantalon ? 'checked' : ''}>
-                                <label>Possède un pantalon</label>
-                            </div>
-                            <div class="form-group">
-                                <label>Date d'expiration</label>
-                                <input type="date" id="pantalonExp" value="${employee.pantalonExp || ''}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="equipment-section">
-                        <h3>👕 Polo</h3>
-                        <div class="equipment-fields">
-                            <div class="checkbox-field">
-                                <input type="checkbox" id="hasPolo" ${employee.polo ? 'checked' : ''}>
-                                <label>Possède un polo</label>
-                            </div>
-                            <div class="form-group">
-                                <label>Date d'expiration</label>
-                                <input type="date" id="poloExp" value="${employee.poloExp || ''}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-buttons">
-                        <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-                        <button class="btn-confirm" onclick="saveEmployee('${employeeId || ''}')">
-                            ${isEdit ? 'Modifier' : 'Ajouter'}
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
-            });
-        };
-
-        window.editEmployee = function(id) {
-            showAddModal(id);
-        };
-
-        window.closeModal = function() {
-            const modal = document.getElementById('employeeModal');
-            if (modal) modal.remove();
-        };
-
-        // ============================================
-        // SAUVEGARDER EMPLOYÉ
-        // ============================================
-        window.saveEmployee = async function(employeeId) {
-            const name = document.getElementById('empName').value.trim();
-            
-            if (!name) {
-                showNotification('⚠️ Veuillez entrer un nom', 'error');
-                return;
-            }
-
-            const employeeData = {
-                name: name,
-                casque: document.getElementById('hasCasque').checked,
-                casqueExp: document.getElementById('casqueExp').value || null,
-                chaussure: document.getElementById('hasChaussure').checked,
-                chaussureExp: document.getElementById('chaussureExp').value || null,
-                gilet: document.getElementById('hasGilet').checked,
-                giletExp: document.getElementById('giletExp').value || null,
-                pantalon: document.getElementById('hasPantalon').checked,
-                pantalonExp: document.getElementById('pantalonExp').value || null,
-                polo: document.getElementById('hasPolo').checked,
-                poloExp: document.getElementById('poloExp').value || null
-            };
-
-            try {
-                if (employeeId) {
-                    await updateDoc(doc(db, "employees", employeeId), employeeData);
-                    showNotification('✅ Employé modifié !');
-                } else {
-                    await addDoc(collection(db, "employees"), employeeData);
-                    showNotification('✅ Employé ajouté !');
-                }
-
-                closeModal();
-                await loadEmployees();
-                await checkExpirations();
-
-            } catch (error) {
-                console.error('❌ Erreur:', error);
-                showNotification('❌ Erreur lors de la sauvegarde', 'error');
-            }
-        };
-
-        // ============================================
-        // SUPPRIMER EMPLOYÉ
-        // ============================================
-        window.deleteEmployee = async function(id, name) {
-            if (!confirm(`⚠️ Supprimer ${name} ?\n\nCette action est irréversible.`)) {
-                return;
-            }
-
-            try {
-                await deleteDoc(doc(db, "employees", id));
-                showNotification(`✅ ${name} supprimé`);
-                await loadEmployees();
-            } catch (error) {
-                console.error('❌ Erreur:', error);
-                showNotification('❌ Erreur lors de la suppression', 'error');
-            }
-        };
-
-        // ============================================
-        // RECHERCHE
-        // ============================================
-        window.filterEmployees = function() {
-            displayEmployees();
-        };
-
-        // ============================================
-        // UTILITAIRES
-        // ============================================
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return 'N/A';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            setTimeout(() => notification.remove(), 4000);
-        }
-
-        // ============================================
-        // VÉRIFICATION QUOTIDIENNE AUTOMATIQUE
-        // ============================================
-        setInterval(async () => {
-            console.log("🔄 Vérification automatique des expirations (24h)...");
-            await loadEmployees();
-            await checkExpirations();
-        }, 24 * 60 * 60 * 1000);
-
-        console.log("✅ RTE EPI INVENTAIRE - Prêt à l'emploi !");
-    </script>
+/* ── 24h auto-check ── */
+setInterval(async()=>{await loadEmployees();await checkExpirations()},864e5);
+</script>
 </body>
 </html>
